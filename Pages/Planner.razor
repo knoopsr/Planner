@@ -1,0 +1,138 @@
+@page "/planner"
+@using BlazorApp1.Shared
+
+<h3>Projectplanning</h3>
+
+<div class="row">
+    <div class="col-9">
+        <SchedulerPro @ref="Scheduler"
+                      Resources="Resources"
+                      Events="Events"
+                      OnEventClick="HandleEventClick"
+                      OnEventDblClick="HandleEventDblClick"
+                      OnEventAdded="HandleEventAdded"
+                      OnEventUpdated="HandleEventUpdated"
+                      OnEventRemoved="HandleEventRemoved" />
+    </div>
+
+    <div class="col-3">
+        <h5>Geselecteerd project</h5>
+        @if (SelectedEvent is null)
+        {
+            <p class="text-muted">Klik op een taak in de planner.</p>
+        }
+        else
+        {
+            <div class="card">
+                <div class="card-body">
+                    <div><strong>ProjectId:</strong> @SelectedEvent.ProjectId</div>
+                    <div><strong>Naam:</strong> @SelectedEvent.Name</div>
+                    <div><strong>Resource:</strong> @SelectedEvent.ResourceId</div>
+                    <div><strong>Periode:</strong> @SelectedEvent.StartDate:dd/MM/yyyy - @SelectedEvent.EndDate:dd/MM/yyyy</div>
+                </div>
+            </div>
+        }
+
+        <hr />
+
+        <button class="btn btn-sm btn-primary mb-1" @onclick="NieuwEventToevoegen">
+            Nieuw event toevoegen (C# -> JS)
+        </button>
+    </div>
+</div>
+
+@code {
+    private SchedulerPro? Scheduler;
+
+    private List<SchedulerPro.ResourceDto> Resources = new();
+    private List<SchedulerPro.SchedulerEventDto> Events = new();
+
+    private SchedulerPro.SchedulerEventDto? SelectedEvent;
+
+    protected override void OnInitialized()
+    {
+        // hier later: echte data uit API
+        Resources = new()
+        {
+            new SchedulerPro.ResourceDto { Id = 1, Name = "Ploeg 1" },
+            new SchedulerPro.ResourceDto { Id = 2, Name = "Ploeg 2" }
+        };
+
+        Events = new()
+        {
+            new SchedulerPro.SchedulerEventDto
+            {
+                Id = 1,
+                Name = "Project A - Opmeting",
+                ResourceId = 1,
+                StartDate = new DateTime(2025, 1, 2),
+                EndDate   = new DateTime(2025, 1, 3),
+                ProjectId = 101
+            },
+            new SchedulerPro.SchedulerEventDto
+            {
+                Id = 2,
+                Name = "Project B - Plaatsing",
+                ResourceId = 2,
+                StartDate = new DateTime(2025, 1, 5),
+                EndDate   = new DateTime(2025, 1, 7),
+                ProjectId = 202
+            }
+        };
+    }
+
+    private Task HandleEventClick(SchedulerPro.SchedulerEventDto e)
+    {
+        SelectedEvent = e;
+        StateHasChanged();
+        return Task.CompletedTask;
+    }
+
+    private Task HandleEventDblClick(SchedulerPro.SchedulerEventDto e)
+    {
+        // hier kan je bv. naar /project/{id} navigeren
+        Console.WriteLine($"Dubbelklik op event {e.Id} (Project {e.ProjectId})");
+        return Task.CompletedTask;
+    }
+
+    private Task HandleEventAdded(List<SchedulerPro.SchedulerEventDto> nieuweEvents)
+    {
+        // gebruiker heeft een event toegevoegd in Bryntum (bijv. via editor)
+        // hier sla je ze op in je DB
+        Console.WriteLine($"Toegevoegd in scheduler: {nieuweEvents.Count} events");
+        return Task.CompletedTask;
+    }
+
+    private Task HandleEventUpdated(SchedulerPro.SchedulerEventDto e)
+    {
+        // gebruiker heeft event gewijzigd in Bryntum (drag/drop, resize, editor)
+        // hier update je je DB
+        Console.WriteLine($"Event {e.Id} aangepast, nieuwe periode: {e.StartDate} - {e.EndDate}");
+        return Task.CompletedTask;
+    }
+
+    private Task HandleEventRemoved(List<int> ids)
+    {
+        // gebruiker heeft event(s) verwijderd in Bryntum
+        Console.WriteLine($"Verwijderd ids: {string.Join(",", ids)}");
+        return Task.CompletedTask;
+    }
+
+    private async Task NieuwEventToevoegen()
+    {
+        if (Scheduler is null) return;
+
+        var nieuw = new SchedulerPro.SchedulerEventDto
+        {
+            Id = 999, // in echte app: id van DB
+            Name = "Nieuw project (C#)",
+            ResourceId = 1,
+            StartDate = new DateTime(2025, 1, 10),
+            EndDate   = new DateTime(2025, 1, 12),
+            ProjectId = 999
+        };
+
+        // direct in de planner zetten, zonder alles te refreshen
+        await Scheduler.AddEventAsync(nieuw);
+    }
+}

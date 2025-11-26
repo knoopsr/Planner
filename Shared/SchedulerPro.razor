@@ -1,0 +1,135 @@
+@using Microsoft.JSInterop
+@implements IAsyncDisposable
+@inject IJSRuntime JS
+
+<div id="@Id" style="@Style"></div>
+
+@code {
+    [Parameter] public string Id { get; set; } = "schedulerHost";
+    [Parameter] public string Style { get; set; } = "height:600px; width:100%;";
+
+    // Initiële data (optioneel, voor eerste load)
+    [Parameter] public IEnumerable<ResourceDto> Resources { get; set; } = Array.Empty<ResourceDto>();
+    [Parameter] public IEnumerable<SchedulerEventDto> Events { get; set; } = Array.Empty<SchedulerEventDto>();
+
+    // Callbacks naar buiten (Blazor code)
+    [Parameter] public EventCallback<SchedulerEventDto> OnEventClick { get; set; }
+    [Parameter] public EventCallback<SchedulerEventDto> OnEventDblClick { get; set; }
+
+    [Parameter] public EventCallback<List<SchedulerEventDto>> OnEventAdded { get; set; }
+    [Parameter] public EventCallback<SchedulerEventDto> OnEventUpdated { get; set; }
+    [Parameter] public EventCallback<List<int>> OnEventRemoved { get; set; }
+
+    private DotNetObjectReference<SchedulerPro>? _dotNetRef;
+    private bool _initialized;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            _dotNetRef = DotNetObjectReference.Create(this);
+
+            var config = new
+            {
+                // hier kun je eventueel dynamische periode doorgeven
+                startDate = "2025-01-01",
+                endDate   = "2025-01-31",
+                resources = Resources,
+                events    = Events
+            };
+
+            await JS.InvokeVoidAsync("bryntumScheduler.init", Id, config, _dotNetRef);
+            _initialized = true;
+        }
+    }
+
+    // ====== JS -> C# ======
+
+    [JSInvokable]
+    public async Task OnEventClickFromJs(SchedulerEventDto e)
+    {
+        if (OnEventClick.HasDelegate)
+            await OnEventClick.InvokeAsync(e);
+    }
+
+    [JSInvokable]
+    public async Task OnEventDblClickFromJs(SchedulerEventDto e)
+    {
+        if (OnEventDblClick.HasDelegate)
+            await OnEventDblClick.InvokeAsync(e);
+    }
+
+    [JSInvokable]
+    public async Task OnEventStoreAddFromJs(List<SchedulerEventDto> newEvents)
+    {
+        if (OnEventAdded.HasDelegate)
+            await OnEventAdded.InvokeAsync(newEvents);
+    }
+
+    [JSInvokable]
+    public async Task OnEventStoreUpdateFromJs(SchedulerEventDto updated)
+    {
+        if (OnEventUpdated.HasDelegate)
+            await OnEventUpdated.InvokeAsync(updated);
+    }
+
+    [JSInvokable]
+    public async Task OnEventStoreRemoveFromJs(List<int> removedIds)
+    {
+        if (OnEventRemoved.HasDelegate)
+            await OnEventRemoved.InvokeAsync(removedIds);
+    }
+
+    // ====== C# -> JS: gerichte CRUD ======
+
+    public async Task AddEventAsync(SchedulerEventDto evt)
+    {
+        if (!_initialized) return;
+        await JS.InvokeVoidAsync("bryntumScheduler.addEvent", Id, evt);
+    }
+
+    public async Task UpdateEventAsync(SchedulerEventDto evt)
+    {
+        if (!_initialized) return;
+        await JS.InvokeVoidAsync("bryntumScheduler.updateEvent", Id, evt);
+    }
+
+    public async Task RemoveEventAsync(int id)
+    {
+        if (!_initialized) return;
+        await JS.InvokeVoidAsync("bryntumScheduler.removeEvent", Id, id);
+    }
+
+    public async Task<IReadOnlyList<SchedulerEventDto>> GetEventsAsync()
+    {
+        if (!_initialized) return Array.Empty<SchedulerEventDto>();
+        var result = await JS.InvokeAsync<SchedulerEventDto[]>("bryntumScheduler.getEvents", Id);
+        return result;
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        _dotNetRef?.Dispose();
+        await Task.CompletedTask;
+    }
+
+    // ====== DTO's ======
+
+    public class ResourceDto
+    {
+        public int Id { get; set; }
+        public string Name { get; set; } = "";
+    }
+
+    public class SchedulerEventDto
+    {
+        public int Id { get; set; }
+        public string Name { get; set; } = "";
+        public int ResourceId { get; set; }
+
+        public DateTime StartDate { get; set; }
+        public DateTime EndDate { get; set; }
+
+        public int? ProjectId { get; set; }
+    }
+}

@@ -1,0 +1,13 @@
+﻿<h4>Project @ProjectId</h4>
+
+<p>Hier komen de details van project @ProjectId.</p>
+
+<button class="btn btn-sm btn-secondary" @onclick="OnClose">Sluiten</button>
+
+@code {
+    [Parameter] public int ProjectId { get; set; }
+
+    [Parameter] public EventCallback OnClose { get; set; }
+
+    // hier zou je met HttpClient de projectdetails kunnen ophalen
+}

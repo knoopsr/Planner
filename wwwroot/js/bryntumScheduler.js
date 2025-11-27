@@ -45,6 +45,8 @@ window.bryntumScheduler = (function () {
                     if (!dotNetRef) return;
                     dotNetRef.invokeMethodAsync('OnEventDblClickFromJs', toPlainEvent(eventRecord));
                 }
+                
+
             }
         });
 
@@ -69,6 +71,7 @@ window.bryntumScheduler = (function () {
                         records.map(r => r.id)
                     );
                 }
+                
             });
         }
 

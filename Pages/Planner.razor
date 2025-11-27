@@ -1,6 +1,28 @@
 @page "/planner"
 @using BlazorApp1.Shared
 
+
+<DxPopup @bind-Visible="IsProjectPopupVisible"
+         ShowCloseButton="true"
+         CloseOnOutsideClick="true"
+         Width="800px"
+         Height="600px"
+         HeaderText="Project details">
+
+    <BodyTemplate>
+        @if (SelectedProjectId.HasValue)
+        {
+            <ProjectDetail ProjectId="SelectedProjectId.Value"
+                           OnClose="CloseProjectPopup" />
+        }
+    </BodyTemplate>
+</DxPopup>
+
+
+
+
+
+
 <h3>Projectplanning</h3>
 
 <div class="row">
@@ -38,8 +60,17 @@
         <button class="btn btn-sm btn-primary mb-1" @onclick="NieuwEventToevoegen">
             Nieuw event toevoegen (C# -> JS)
         </button>
+
+
+
+        <button class="btn btn-primary" @onclick="() => OpenProjectPopup(101)">
+            Test: open project 101
+        </button>
     </div>
 </div>
+
+
+
 
 @code {
     private SchedulerPro? Scheduler;
@@ -135,4 +166,26 @@
         // direct in de planner zetten, zonder alles te refreshen
         await Scheduler.AddEventAsync(nieuw);
     }
+
+
+    private bool IsProjectPopupVisible;
+    private int? SelectedProjectId;
+
+    private void OpenProjectPopup(int projectId)
+    {
+        SelectedProjectId = projectId;
+        IsProjectPopupVisible = true;
+    }
+
+    private void CloseProjectPopup()
+    {
+        IsProjectPopupVisible = false;
+    }
+
+
+
+
+
+
+
 }

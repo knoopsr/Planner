@@ -21,12 +21,7 @@
 
 
 
-
-
-<h3>Projectplanning</h3>
-
-<div class="row">
-    <div class="col-9">
+<div class="planner-full">
         <SchedulerPro @ref="Scheduler"
                       Resources="Resources"
                       Events="Events"
@@ -37,7 +32,7 @@
                       OnEventRemoved="HandleEventRemoved" />
     </div>
 
-    <div class="col-3">
+   @*  <div class="col-3">
         <h5>Geselecteerd project</h5>
         @if (SelectedEvent is null)
         {
@@ -66,8 +61,7 @@
         <button class="btn btn-primary" @onclick="() => OpenProjectPopup(101)">
             Test: open project 101
         </button>
-    </div>
-</div>
+    </div> *@
 
 
 
@@ -181,11 +175,4 @@
     {
         IsProjectPopupVisible = false;
     }
-
-
-
-
-
-
-
 }

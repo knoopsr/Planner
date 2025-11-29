@@ -13,6 +13,9 @@ window.bryntumScheduler = (function () {
         };
     }
 
+
+
+
     function init(elementId, config, dotNetRef) {
         const targetEl = document.getElementById(elementId);
         if (!targetEl) {
@@ -20,8 +23,18 @@ window.bryntumScheduler = (function () {
             return;
         }
 
+
+        function calcHeight() {
+            const rect = targetEl.getBoundingClientRect();
+            return window.innerHeight - rect.top;
+        }
+
+
+
         const scheduler = new bryntum.schedulerpro.SchedulerPro({
             appendTo: targetEl,
+            autoHeight: false,
+            height: calcHeight(),  
 
             startDate: config.startDate ? new Date(config.startDate) : new Date(),
             endDate:   config.endDate   ? new Date(config.endDate)   : new Date(),
@@ -49,6 +62,18 @@ window.bryntumScheduler = (function () {
 
             }
         });
+
+        window.addEventListener('resize', () => {
+            const h = calcHeight();
+            targetEl.style.height = h + 'px';
+            scheduler.height = h;
+            if (scheduler.refresh) {
+                scheduler.refresh();
+            }
+        });
+
+
+
 
         // eventStore changes => terug naar C#
         if (dotNetRef) {

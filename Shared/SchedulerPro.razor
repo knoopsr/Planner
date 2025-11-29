@@ -1,3 +1,4 @@
+@* SchedulerPro.razor *@
 @using Microsoft.JSInterop
 @implements IAsyncDisposable
 @inject IJSRuntime JS
@@ -6,7 +7,7 @@
 
 @code {
     [Parameter] public string Id { get; set; } = "schedulerHost";
-    [Parameter] public string Style { get; set; } = "height:600px; width:100%;";
+    [Parameter] public string Style { get; set; } = "height:700px; width:100%;";
 
     // Initiële data (optioneel, voor eerste load)
     [Parameter] public IEnumerable<ResourceDto> Resources { get; set; } = Array.Empty<ResourceDto>();

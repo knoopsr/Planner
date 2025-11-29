@@ -1,0 +1,65 @@
+﻿@page "/projecten"
+@using DevExpress.Blazor
+@using Models.Projecten
+
+<h3>Projecten overzicht</h3>
+
+<div class="d-flex mb-2">
+    <input class="form-control w-25"
+           placeholder="Zoek op nummer, naam of klant..."
+           @bind="searchText"
+           @bind:event="oninput" />
+</div>
+
+
+<DxGrid Data="@FilteredProjects"
+        PageSize="20">
+    @* PageSize zorgt automatisch voor paging *@
+    <Columns>
+        <DxGridDataColumn FieldName="ProjectNr" Caption="Projectnr" />
+        <DxGridDataColumn FieldName="Naam" Caption="Naam" />
+        <DxGridDataColumn FieldName="Klant" Caption="Klant" />
+        <DxGridDataColumn FieldName="Status" Caption="Status" />
+        <DxGridDataColumn FieldName="StartDatum" Caption="Start"
+                          DisplayFormat="d" />
+        @* later: kolom met knop "Openen" of zo *@
+    </Columns>
+</DxGrid>
+
+@code {
+    private string? searchText;
+    private List<ProjectModel> allProjects = new();
+
+    // Dit is de gefilterde lijst die de grid te zien krijgt
+    private IEnumerable<ProjectModel> FilteredProjects =>
+        string.IsNullOrWhiteSpace(searchText)
+            ? allProjects
+            : allProjects.Where(p =>
+                   (p.ProjectNr?.Contains(searchText, StringComparison.OrdinalIgnoreCase) ?? false) ||
+                   (p.Naam?.Contains(searchText, StringComparison.OrdinalIgnoreCase) ?? false) ||
+                   (p.Klant?.Contains(searchText, StringComparison.OrdinalIgnoreCase) ?? false)
+               );
+
+    protected override async Task OnInitializedAsync()
+    {
+        // TODO: hier later je API-call doen
+        // bv: allProjects = await Http.GetFromJsonAsync<List<ProjectModel>>("api/projecten");
+
+        allProjects = new()
+        {
+            new ProjectModel {
+                Id = 1, ProjectNr = "P2025-001",
+                Naam = "Nieuw dak", Klant = "Jansen",
+                Status = "In planning",
+                StartDatum = new DateTime(2025, 1, 10)
+            },
+            new ProjectModel {
+                Id = 2, ProjectNr = "P2025-002",
+                Naam = "Ramen vervangen", Klant = "Peeters",
+                Status = "Gereed",
+                StartDatum = new DateTime(2025, 2, 3)
+            }
+            // ...
+        };
+    }
+}

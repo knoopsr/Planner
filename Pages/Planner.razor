@@ -1,5 +1,7 @@
 @page "/planner"
 @using BlazorApp1.Shared
+@using Models.SchedulerPro
+
 
 
 <DxPopup @bind-Visible="IsProjectPopupVisible"
@@ -29,7 +31,11 @@
                       OnEventDblClick="HandleEventDblClick"
                       OnEventAdded="HandleEventAdded"
                       OnEventUpdated="HandleEventUpdated"
-                      OnEventRemoved="HandleEventRemoved" />
+                      OnEventRemoved="HandleEventRemoved"
+                  OnEventDragStart="HandleEventDragStart"
+                  OnEventDrag="HandleEventDrag"
+                  OnEventDrop="HandleEventDrop" 
+                  OnUnplannedDrop="HandleUnplannedDrop" />
     </div>
 
    @*  <div class="col-3">
@@ -69,23 +75,23 @@
 @code {
     private SchedulerPro? Scheduler;
 
-    private List<SchedulerPro.ResourceDto> Resources = new();
-    private List<SchedulerPro.SchedulerEventDto> Events = new();
+    private List<ResourceDto> Resources = new();
+    private List<SchedulerEventDto> Events = new();
 
-    private SchedulerPro.SchedulerEventDto? SelectedEvent;
+    private SchedulerEventDto? SelectedEvent;
 
     protected override void OnInitialized()
     {
         // hier later: echte data uit API
         Resources = new()
         {
-            new SchedulerPro.ResourceDto { Id = 1, Name = "Ploeg 1" },
-            new SchedulerPro.ResourceDto { Id = 2, Name = "Ploeg 2" }
+            new ResourceDto { Id = 1, Name = "Ploeg 1" },
+            new ResourceDto { Id = 2, Name = "Ploeg 2" }
         };
 
         Events = new()
         {
-            new SchedulerPro.SchedulerEventDto
+            new SchedulerEventDto
             {
                 Id = 1,
                 Name = "Project A - Opmeting",
@@ -94,7 +100,7 @@
                 EndDate   = new DateTime(2025, 1, 3),
                 ProjectId = 101
             },
-            new SchedulerPro.SchedulerEventDto
+            new SchedulerEventDto
             {
                 Id = 2,
                 Name = "Project B - Plaatsing",
@@ -102,25 +108,34 @@
                 StartDate = new DateTime(2025, 1, 5),
                 EndDate   = new DateTime(2025, 1, 7),
                 ProjectId = 202
+            },
+            new SchedulerEventDto
+            {
+                Id = 3,
+                Name = "Project C - Afwerking", 
+                StartDate = null,
+                EndDate = null,
+                ProjectId = 303
             }
+
         };
     }
 
-    private Task HandleEventClick(SchedulerPro.SchedulerEventDto e)
+    private Task HandleEventClick(SchedulerEventDto e)
     {
         SelectedEvent = e;
         StateHasChanged();
         return Task.CompletedTask;
     }
 
-    private Task HandleEventDblClick(SchedulerPro.SchedulerEventDto e)
+    private Task HandleEventDblClick(SchedulerEventDto e)
     {
         // hier kan je bv. naar /project/{id} navigeren
         Console.WriteLine($"Dubbelklik op event {e.Id} (Project {e.ProjectId})");
         return Task.CompletedTask;
     }
 
-    private Task HandleEventAdded(List<SchedulerPro.SchedulerEventDto> nieuweEvents)
+    private Task HandleEventAdded(List<SchedulerEventDto> nieuweEvents)
     {
         // gebruiker heeft een event toegevoegd in Bryntum (bijv. via editor)
         // hier sla je ze op in je DB
@@ -128,7 +143,7 @@
         return Task.CompletedTask;
     }
 
-    private Task HandleEventUpdated(SchedulerPro.SchedulerEventDto e)
+    private Task HandleEventUpdated(SchedulerEventDto e)
     {
         // gebruiker heeft event gewijzigd in Bryntum (drag/drop, resize, editor)
         // hier update je je DB
@@ -147,7 +162,7 @@
     {
         if (Scheduler is null) return;
 
-        var nieuw = new SchedulerPro.SchedulerEventDto
+        var nieuw = new SchedulerEventDto
         {
             Id = 999, // in echte app: id van DB
             Name = "Nieuw project (C#)",
@@ -174,5 +189,33 @@
     private void CloseProjectPopup()
     {
         IsProjectPopupVisible = false;
+    }
+    private Task HandleEventDragStart(EventDragPayloadDto payload)
+    {
+        Console.WriteLine($"Drag start: {payload.Events.Count} event(s), resource {payload.Ctx.ResourceId}");
+        return Task.CompletedTask;
+    }
+    private Task HandleEventDrag(EventDragPayloadDto payload)
+    {
+        return Task.CompletedTask;
+    }
+    private Task HandleEventDrop(EventDragPayloadDto payload)
+    {
+        foreach (var ev in payload.Events)
+        {
+            Console.WriteLine($"Drop event {ev.Id} -> resource {payload.Ctx.ResourceId}, {payload.Ctx.StartDate} - {payload.Ctx.EndDate}");
+        }
+        return Task.CompletedTask;
+    }
+
+
+    private Task HandleUnplannedDrop(UnplannedDropPayloadDto payload)
+    {
+        foreach (var ev in payload.Events)
+        {
+            Console.WriteLine($"Unplanned drop: event {ev.Id} -> resource {payload.ResourceId}");
+            // hier later: DB updaten
+        }
+        return Task.CompletedTask;
     }
 }

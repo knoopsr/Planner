@@ -1,5 +1,6 @@
 @* SchedulerPro.razor *@
 @using Microsoft.JSInterop
+@using Models.SchedulerPro
 @implements IAsyncDisposable
 @inject IJSRuntime JS
 
@@ -19,6 +20,11 @@
     [Parameter] public EventCallback<List<SchedulerEventDto>> OnEventAdded { get; set; }
     [Parameter] public EventCallback<SchedulerEventDto> OnEventUpdated { get; set; }
     [Parameter] public EventCallback<List<int>> OnEventRemoved { get; set; }
+    [Parameter] public EventCallback<EventDragPayloadDto> OnEventDragStart { get; set; }
+    [Parameter] public EventCallback<EventDragPayloadDto> OnEventDrag { get; set; }
+    [Parameter] public EventCallback<EventDragPayloadDto> OnEventDrop { get; set; } 
+    [Parameter] public EventCallback<UnplannedDropPayloadDto> OnUnplannedDrop { get; set; }
+
 
     private DotNetObjectReference<SchedulerPro>? _dotNetRef;
     private bool _initialized;
@@ -80,6 +86,37 @@
             await OnEventRemoved.InvokeAsync(removedIds);
     }
 
+    [JSInvokable]
+    public async Task OnEventDragStartFromJs(EventDragPayloadDto payload)
+    {
+        if(OnEventDragStart.HasDelegate)
+            await OnEventDragStart.InvokeAsync(payload);  
+    }
+
+    [JSInvokable]
+    public async Task OnEventDragFromJs(EventDragPayloadDto payload)
+    {
+        if(OnEventDrag.HasDelegate)
+            await OnEventDrag.InvokeAsync(payload);
+    }
+
+    [JSInvokable]
+    public async Task OnEventDropFromJs(EventDragPayloadDto payload)
+    {
+        if(OnEventDrop.HasDelegate)
+            await OnEventDrop.InvokeAsync(payload);
+    }
+
+    [JSInvokable]
+    public async Task OnUnplannedDropFromJs(UnplannedDropPayloadDto payload)
+    {
+        if (OnUnplannedDrop.HasDelegate)
+            await OnUnplannedDrop.InvokeAsync(payload);
+    }
+
+
+
+
     // ====== C# -> JS: gerichte CRUD ======
 
     public async Task AddEventAsync(SchedulerEventDto evt)
@@ -100,6 +137,12 @@
         await JS.InvokeVoidAsync("bryntumScheduler.removeEvent", Id, id);
     }
 
+
+
+
+
+
+
     public async Task<IReadOnlyList<SchedulerEventDto>> GetEventsAsync()
     {
         if (!_initialized) return Array.Empty<SchedulerEventDto>();
@@ -111,25 +154,5 @@
     {
         _dotNetRef?.Dispose();
         await Task.CompletedTask;
-    }
-
-    // ====== DTO's ======
-
-    public class ResourceDto
-    {
-        public int Id { get; set; }
-        public string Name { get; set; } = "";
-    }
-
-    public class SchedulerEventDto
-    {
-        public int Id { get; set; }
-        public string Name { get; set; } = "";
-        public int ResourceId { get; set; }
-
-        public DateTime StartDate { get; set; }
-        public DateTime EndDate { get; set; }
-
-        public int? ProjectId { get; set; }
     }
 }

@@ -1,0 +1,357 @@
+﻿@page "/project"
+@page "/project/{Id:int}"
+
+@using DevExpress.Blazor
+@using Models.Projecten
+@inject NavigationManager Navigation
+
+<PageTitle>Project details</PageTitle>
+
+<DxLoadingPanel @bind-Visible="isLoading"
+                IsContentBlocked="true"
+                ApplyBackgroundShading="true"
+                IndicatorAreaVisible="false"
+                Text="Gegevens laden...">
+
+    <div class="container-fluid p-3">
+
+        @if (Id is null)
+        {
+            <div class="alert alert-info">
+                Geen project geselecteerd. Ga terug naar het
+                <a href="/projecten">projectenoverzicht</a>.
+            </div>
+        }
+        else if (_Project is null && !isLoading)
+        {
+            <div class="alert alert-warning">
+                Project met ID @Id werd niet gevonden.
+            </div>
+        }
+        else if (_Project is not null)
+        {
+            <!-- HEADER: Titel + acties -->
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <div class="d-flex align-items-center gap-2">
+                    <DxButton RenderStyle="ButtonRenderStyle.Secondary"
+                              Size="Size.Small"
+                              Click="@TerugNaarOverzicht">
+                        <span class="bi bi-arrow-left me-1"></span>
+                        Terug
+                    </DxButton>
+
+                    <div>
+                        <h3 class="mb-0">
+                            @_Project.ProjectNr - @_Project.Naam
+                        </h3>
+                        <small class="text-muted">
+                            Klant: @_Project.Klant
+                        </small>
+                    </div>
+                </div>
+
+                <div class="d-flex align-items-center gap-2">
+                    <span class="@GetStatusBadgeClass(_Project.Status)">
+                        @_Project.Status
+                    </span>
+
+                    <DxButton RenderStyle="ButtonRenderStyle.Primary"
+                              Size="Size.Small"
+                              Click="@BewerkProject">
+                        <span class="bi bi-pencil-square me-1"></span>
+                        Bewerken
+                    </DxButton>
+                </div>
+            </div>
+
+            <!-- BOVENSTE RIJ: Project-info -->
+            <div class="row mb-3">
+                <div class="col-lg-6 mb-3">
+                    <div class="card shadow-sm h-100">
+                        <div class="card-header">
+                            <strong>Projectinfo</strong>
+                        </div>
+                        <div class="card-body">
+                            <dl class="row mb-0">
+                                <dt class="col-sm-4">Projectnummer</dt>
+                                <dd class="col-sm-8">@_Project.ProjectNr</dd>
+
+                                <dt class="col-sm-4">Naam</dt>
+                                <dd class="col-sm-8">@_Project.Naam</dd>
+
+                                <dt class="col-sm-4">Klant</dt>
+                                <dd class="col-sm-8">@_Project.Klant</dd>
+
+                                <dt class="col-sm-4">Status</dt>
+                                <dd class="col-sm-8">
+                                    <span class="@GetStatusBadgeClass(_Project.Status)">
+                                        @_Project.Status
+                                    </span>
+                                </dd>
+
+                                <dt class="col-sm-4">Startdatum</dt>
+                                <dd class="col-sm-8">
+                                    @(_Project.StartDatum.ToString("dd/MM/yyyy") ?? "-")
+                                </dd>
+
+                                <dt class="col-sm-4">Opmerkingen</dt>
+                                <dd class="col-sm-8">
+                                    @(!string.IsNullOrWhiteSpace(_Project.Opmerking)
+                                                                    ? _Project.Opmerking
+                                                                    : "-")
+                            </dd>
+                        </dl>
+                    </div>
+                </div>
+            </div>
+
+                <div class="col-lg-6 mb-3">
+                    <div class="card shadow-sm h-100">
+                        <div class="card-header">
+                            <strong>Acties</strong>
+                        </div>
+                        <div class="card-body d-flex flex-column gap-2">
+                            <DxButton RenderStyle="ButtonRenderStyle.Secondary"
+                                      Size="Size.Small"
+                                      Click="@PlanInPlanner">
+                                <span class="bi bi-calendar-event me-1"></span>
+                                Open in planning
+                            </DxButton>
+
+                            <DxButton RenderStyle="ButtonRenderStyle.Secondary"
+                                      Size="Size.Small"
+                                      Click="@ToonDocumenten">
+                                <span class="bi bi-folder2-open me-1"></span>
+                                Documenten
+                            </DxButton>
+
+                            <DxButton RenderStyle="ButtonRenderStyle.Secondary"
+                                      Size="Size.Small"
+                                      Click="@ToonHistoriek">
+                                <span class="bi bi-clock-history me-1"></span>
+                                Historiek
+                            </DxButton>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ONDERSTE RIJ: Stappen-grid -->
+            <div class="card shadow-sm">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <strong>Projectstappen</strong>
+
+                    <div class="d-flex gap-2">
+                        <DxButton RenderStyle="ButtonRenderStyle.Secondary"
+                                  Size="Size.ExtraSmall"
+                                  Click="@NieuweStap">
+                            <span class="bi bi-plus-circle me-1"></span>
+                            Nieuwe stap
+                        </DxButton>
+
+                        <DxButton RenderStyle="ButtonRenderStyle.Secondary"
+                                  Size="Size.ExtraSmall"
+                                  Click="@HerlaadStappen">
+                            <span class="bi bi-arrow-clockwise me-1"></span>
+                            Herladen
+                        </DxButton>
+                    </div>
+                </div>
+
+                <div class="card-body">
+                    <DxGrid Data="@Stappen"
+                            PageSize="20"
+                            CssClass="ch-360"
+                            ColumnResizeMode="GridColumnResizeMode.ColumnsContainer"
+                            ShowAllRows="true">
+
+                        <Columns>
+                            <DxGridDataColumn FieldName="VolgNr"
+                                              Caption="#"
+                                              MinWidth="60" />
+
+                            <DxGridDataColumn FieldName="Naam"
+                                              Caption="Stap"
+                                              MinWidth="200" />
+
+                            <DxGridDataColumn FieldName="Status"
+                                              Caption="Status"
+                                              MinWidth="130">
+                                <CellDisplayTemplate Context="cell">
+                                @{
+                                        var status = (string?)cell.Value ?? string.Empty;
+                                        var badgeClass = status switch
+                                        {
+                                            "Gereed" => "badge bg-success",
+                                            "In uitvoering" => "badge bg-primary",
+                                            "In wachtrij" => "badge bg-warning text-dark",
+                                            "Geannuleerd" => "badge bg-danger",
+                                            _ => "badge bg-secondary"
+                                        };
+                                    }
+                                    <span class="@badgeClass">@status</span>
+                                </CellDisplayTemplate>
+                            </DxGridDataColumn>
+
+                            <DxGridDataColumn FieldName="StartDatum"
+                                              Caption="Start"
+                                              DisplayFormat="dd/MM/yyyy"
+                                              MinWidth="110" />
+
+                            <DxGridDataColumn FieldName="EindDatum"
+                                              Caption="Einde"
+                                              DisplayFormat="dd/MM/yyyy"
+                                              MinWidth="110" />
+
+                            <DxGridDataColumn Caption="">
+                                <CellDisplayTemplate Context="cell">
+                                    @{
+                                        var stap = (ProjectStapModel)cell.DataItem;
+                                    }
+                                    <DxButton RenderStyle="ButtonRenderStyle.Secondary"
+                                              Size="Size.ExtraSmall"
+                                              Click="@(() => BewerkStap(stap))">
+                                        <span class="bi bi-pencil-square me-1"></span>
+                                        Bewerken
+                                    </DxButton>
+                                </CellDisplayTemplate>
+                            </DxGridDataColumn>
+                        </Columns>
+                    </DxGrid>
+                </div>
+            </div>
+        }
+    </div>
+</DxLoadingPanel>
+
+@code {
+    [Parameter] public int? Id { get; set; }
+
+    bool isLoading;
+
+    private ProjectModel? _Project;
+    private List<ProjectStapModel> Stappen = new();
+
+    protected override async Task OnParametersSetAsync()
+    {
+        if (Id is null)
+        {
+            _Project = null;
+            Stappen.Clear();
+            return;
+        }
+
+        isLoading = true;
+        try
+        {
+            // TODO: vervang dit later door echte API-calls
+            await Task.Delay(300);
+
+            _Project = new ProjectModel
+            {
+                Id = Id.Value,
+                ProjectNr = $"P2025-{Id:000}",
+                Naam = "Demo project",
+                Klant = "Demo klant",
+                Status = "In planning",
+                StartDatum = new DateTime(2025, 1, 10),
+                Opmerking = "Dit is een voorbeeldproject."
+            };
+
+            Stappen = new()
+            {
+                new ProjectStapModel
+                {
+                    Id = 1,
+                    ProjectId = _Project.Id,
+                    VolgNr = 10,
+                    Naam = "Opmeting",
+                    Status = "Gereed",
+                    StartDatum = new DateTime(2025, 1, 5),
+                    EindDatum = new DateTime(2025, 1, 5)
+                },
+                new ProjectStapModel
+                {
+                    Id = 2,
+                    ProjectId = _Project.Id,
+                    VolgNr = 20,
+                    Naam = "Offerte",
+                    Status = "In uitvoering",
+                    StartDatum = new DateTime(2025, 1, 6),
+                    EindDatum = null
+                },
+                new ProjectStapModel
+                {
+                    Id = 3,
+                    ProjectId = _Project.Id,
+                    VolgNr = 30,
+                    Naam = "Plaatsing",
+                    Status = "In wachtrij",
+                    StartDatum = null,
+                    EindDatum = null
+                }
+            };
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+    // Helpers
+
+    private string GetStatusBadgeClass(string? status) =>
+        status switch
+        {
+            "Gereed" => "badge bg-success",
+            "In planning" => "badge bg-primary",
+            "In uitvoering" => "badge bg-primary",
+            "In wachtrij" => "badge bg-warning text-dark",
+            "Geannuleerd" => "badge bg-danger",
+            _ => "badge bg-secondary"
+        };
+
+    // Navigatie & acties
+
+    private void TerugNaarOverzicht()
+        => Navigation.NavigateTo("/projecten");
+
+    private void BewerkProject()
+    {
+        // TODO: open bewerk-dialoog of navigeren naar bewerkpagina
+        // Navigation.NavigateTo($"/project/edit/{Project?.Id}");
+    }
+
+    private void PlanInPlanner()
+    {
+        // TODO: koppelen met jouw planner pagina
+        // Navigation.NavigateTo($"/planner?projectId={Project?.Id}");
+    }
+
+    private void ToonDocumenten()
+    {
+        // TODO: koppelen aan documenten-module
+    }
+
+    private void ToonHistoriek()
+    {
+        // TODO: koppelen aan historiek/audit log
+    }
+
+    private void NieuweStap()
+    {
+        // TODO: dialoog openen of naar stap-bewerkpagina
+    }
+
+    private void HerlaadStappen()
+    {
+        // Voor nu gewoon OnParametersSetAsync opnieuw aanroepen
+        _ = OnParametersSetAsync();
+    }
+
+    private void BewerkStap(ProjectStapModel stap)
+    {
+        // TODO: dialoog / detailpagina voor stap
+        // bv: Navigation.NavigateTo($"/project/{Project?.Id}/stap/{stap.Id}");
+    }
+}

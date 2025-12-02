@@ -1,7 +1,7 @@
 html, body {
     font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
     margin: 0;
-    background-color: #C0C0C0; /* <--- hier je kleur */
+    background-color: #FAFAFF; /* <--- hier je kleur */
 }
 
 #app {
@@ -18,7 +18,7 @@ html, body {
 
 /* bovenbalk met menu */
 .top-nav {
-    background-color: #343a40;
+    background-color: #444554;
     color: white;
     box-shadow: 0 2px 4px rgba(0,0,0,0.2);
 }

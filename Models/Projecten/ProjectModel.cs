@@ -8,5 +8,6 @@
         public string Klant { get; set; } = "";
         public string Status { get; set; } = "";
         public DateTime StartDatum { get; set; }
+        public string Opmerking { get; set; }
     }
 }

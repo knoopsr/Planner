@@ -1,0 +1,174 @@
+﻿@page "/klanten"
+
+@using DevExpress.Blazor
+@using Models.Klanten
+@using DataService.Klanten
+@inject IKlantenService KlantenService
+@inject NavigationManager Navigation
+@inject HttpClient Http
+
+<PageTitle>Klanten</PageTitle>
+
+<div class="container-fluid p-3">
+
+    <!-- Titel + acties -->
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <div>
+            <h3 class="mb-0">Klanten</h3>
+            <small class="text-muted">Overzicht van alle klanten</small>
+        </div>
+
+        <div>
+            <DxButton RenderStyle="ButtonRenderStyle.Primary"
+                      Size="Size.Small"
+                      Click="@NieuweKlant">
+                <span class="bi bi-person-plus me-1"></span>
+                Nieuwe klant
+            </DxButton>
+        </div>
+    </div>
+
+    <!-- Kaart met filters + grid -->
+    <div class="card shadow-sm">
+        <div class="card-body">
+
+            <!-- Filters -->
+            <div class="row mb-3">
+                <div class="col-md-6 col-lg-4 mb-2">
+                    <div class="input-group">
+                        <span class="input-group-text">
+                            <i class="bi bi-search"></i>
+                        </span>
+                        <input class="form-control"
+                               placeholder="Zoek op naam, achternaam, gemeente, gsm of e-mail..."
+                               @bind="searchText"
+                               @bind:event="oninput" />
+                    </div>
+                </div>
+
+                <div class="col-md-3 col-lg-2 mb-2 d-flex align-items-center">
+                    <DxCheckBox @bind-Checked="toonAlleKlanten"
+                                Caption="Toon ook inactieve" />
+                </div>
+            </div>
+
+            <!-- Grid -->
+            <DxGrid Data="@FilteredKlanten"
+                    PageSize="20"
+                    CssClass="ch-360"
+                    RowClick="OnRowClick"
+                    ColumnResizeMode="GridColumnResizeMode.ColumnsContainer"
+                    ShowFilterRow="false">
+
+                <Columns>
+                    <DxGridDataColumn FieldName="Id"
+                                      Caption="Nr"
+                                      MinWidth="70" />
+
+                    <DxGridDataColumn FieldName="Naam"
+                                      Caption="Naam"
+                                      MinWidth="140" />
+
+                    <DxGridDataColumn FieldName="Achternaam"
+                                      Caption="Achternaam"
+                                      MinWidth="140" />
+
+                    <DxGridDataColumn FieldName="Gemeente"
+                                      Caption="Gemeente"
+                                      MinWidth="150" />
+
+                    <DxGridDataColumn FieldName="Gsm"
+                                      Caption="GSM"
+                                      MinWidth="130" />
+
+                    <DxGridDataColumn FieldName="Email"
+                                      Caption="E-mail"
+                                      MinWidth="200" />
+
+                    <DxGridDataColumn FieldName="IsActief"
+                                      Caption="Status"
+                                      MinWidth="120">
+                        <CellDisplayTemplate Context="cell">
+                            @{
+                                bool actief = cell.Value is bool b && b;
+                                var badgeClass = actief
+                                ? "badge bg-success"
+                                : "badge bg-secondary";
+                                var text = actief ? "Actief" : "Inactief";
+                            }
+                            <span class="@badgeClass">@text</span>
+                        </CellDisplayTemplate>
+                    </DxGridDataColumn>
+
+                    <!-- Actie kolom -->
+                    <DxGridDataColumn Caption="">
+                        <CellDisplayTemplate Context="cell">
+                            @{
+                                var klant = (KlantenModel)cell.DataItem;
+                            }
+                            <DxButton RenderStyle="ButtonRenderStyle.Secondary"
+                                      Size="Size.ExtraSmall"
+                                      Click="@(() => OpenKlant(klant))">
+                                <span class="bi bi-box-arrow-in-right me-1"></span>
+                                Openen
+                            </DxButton>
+                        </CellDisplayTemplate>
+                    </DxGridDataColumn>
+                </Columns>
+
+            </DxGrid>
+
+        </div>
+    </div>
+
+</div>
+
+@code {
+    private string? searchText;
+    private bool toonAlleKlanten = false;
+
+    private List<KlantenModel> allKlanten = new();
+
+    // Gefilterde lijst
+    private IEnumerable<KlantenModel> FilteredKlanten =>
+        allKlanten
+            .Where(c => toonAlleKlanten || c.IsActief)
+            .Where(c =>
+                string.IsNullOrWhiteSpace(searchText)
+                || (c.Naam?.Contains(searchText, StringComparison.OrdinalIgnoreCase) ?? false)
+                || (c.Achternaam?.Contains(searchText, StringComparison.OrdinalIgnoreCase) ?? false)
+                || (c.Gemeente?.Contains(searchText, StringComparison.OrdinalIgnoreCase) ?? false)
+                || (c.Gsm?.Contains(searchText, StringComparison.OrdinalIgnoreCase) ?? false)
+                || (c.Email?.Contains(searchText, StringComparison.OrdinalIgnoreCase) ?? false)
+            );
+
+    protected override async Task OnInitializedAsync()
+    {
+        allKlanten = await KlantenService.GetAll();
+    }
+
+    private async Task NieuweKlant()
+    {
+        allKlanten = await KlantenService.GetAll();
+    }
+
+    private void OpenKlant(KlantenModel klant)
+    {
+        if (klant?.Id > 0)
+        {
+            // TODO: detailpagina voor klant voorzien
+            // bv:
+            Navigation.NavigateTo($"/klant/{klant.Id}");
+        }
+    }
+
+    private void OnRowClick(GridRowClickEventArgs e)
+    {
+        var idObj = e.Grid.GetRowValue(e.VisibleIndex, nameof(KlantenModel.Id));
+
+        if (idObj is int id && id > 0)
+        {
+            Navigation.NavigateTo($"/klant/{id}");
+        }
+    }
+}

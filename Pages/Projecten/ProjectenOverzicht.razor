@@ -1,36 +1,123 @@
 ﻿@page "/projecten"
-@using DevExpress.Blazor
 @using Models.Projecten
+@inject NavigationManager Navigation
 
-<h3>Projecten overzicht</h3>
+<PageTitle>Projecten</PageTitle>
 
-<div class="d-flex mb-2">
-    <input class="form-control w-25"
-           placeholder="Zoek op nummer, naam of klant..."
-           @bind="searchText"
-           @bind:event="oninput" />
+<div class="container-fluid p-3">
+
+    <!-- Titel + acties -->
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <div>
+            <h3 class="mb-0">Projecten</h3>
+            <small class="text-muted">Overzicht van alle projecten</small>
+        </div>
+
+        <div>
+            <!-- Later koppelen aan een “nieuw project” pagina of popup -->
+            <DxButton RenderStyle="ButtonRenderStyle.Primary"
+                      Size="Size.Small"
+                      Click="@OnNieuwProject">
+                <span class="me-1 bi bi-plus-circle"></span>
+                Nieuw project
+            </DxButton>
+        </div>
+    </div>
+
+    <!-- Kaart met zoekbalk + grid -->
+    <div class="card shadow-sm">
+        <div class="card-body">
+
+            <!-- Zoekbalk -->
+            <div class="row mb-3">
+                <div class="col-md-6 col-lg-4">
+                    <div class="input-group">
+                        <span class="input-group-text">
+                            <i class="bi bi-search"></i>
+                        </span>
+                        <input class="form-control"
+                               placeholder="Zoek op nummer, naam of klant..."
+                               @bind="searchText"
+                               @bind:event="oninput" />
+                    </div>
+                </div>
+            </div>
+
+            <!-- Grid -->
+            <DxGrid Data="@FilteredProjects"
+                    PageSize="20"
+                    ShowFilterRow="false"
+                    CssClass="ch-360"
+                    RowClick="OnRowClick"
+                    ColumnResizeMode="GridColumnResizeMode.ColumnsContainer">
+
+
+                <Columns>
+                    <DxGridDataColumn FieldName="ProjectNr"
+                                      Caption="Projectnr"
+                                      MinWidth="120" />
+
+                    <DxGridDataColumn FieldName="Naam"
+                                      Caption="Naam"
+                                      MinWidth="180" />
+
+                    <DxGridDataColumn FieldName="Klant"
+                                      Caption="Klant"
+                                      MinWidth="180" />
+
+                    <!-- Status met badges -->
+                    <DxGridDataColumn FieldName="Status"
+                                      Caption="Status"
+                                      MinWidth="130">
+                        <CellDisplayTemplate Context="cell">
+                            @{
+                                var status = (string?)cell.Value ?? string.Empty;
+                                var badgeClass = status switch
+                                {
+                                    "Gereed" => "badge bg-success",
+                                    "In planning" => "badge bg-warning text-dark",
+                                    "Geannuleerd" => "badge bg-danger",
+                                    _ => "badge bg-secondary"
+                                };
+                            }
+                            <span class="@badgeClass">@status</span>
+                        </CellDisplayTemplate>
+                    </DxGridDataColumn>
+
+
+                    <DxGridDataColumn FieldName="StartDatum"
+                                      Caption="Start"
+                                      DisplayFormat="dd/MM/yyyy"
+                                      MinWidth="110" />
+
+                    <!-- Acties-kolom -->
+                    <DxGridDataColumn Caption="">
+                        <CellDisplayTemplate Context="cell">
+                            @{
+                                var project = (ProjectModel)cell.DataItem;
+                            }
+                            <DxButton RenderStyle="ButtonRenderStyle.Secondary"
+                                      Size="Size.ExtraSmall"
+                                      Click="@(() => OpenProject(project))">
+                                <span class="bi bi-box-arrow-in-right me-1"></span>
+                                Openen
+                            </DxButton>
+                        </CellDisplayTemplate>
+                    </DxGridDataColumn>
+
+                </Columns>
+
+            </DxGrid>
+
+        </div>
+    </div>
 </div>
-
-
-<DxGrid Data="@FilteredProjects"
-        PageSize="20">
-    @* PageSize zorgt automatisch voor paging *@
-    <Columns>
-        <DxGridDataColumn FieldName="ProjectNr" Caption="Projectnr" />
-        <DxGridDataColumn FieldName="Naam" Caption="Naam" />
-        <DxGridDataColumn FieldName="Klant" Caption="Klant" />
-        <DxGridDataColumn FieldName="Status" Caption="Status" />
-        <DxGridDataColumn FieldName="StartDatum" Caption="Start"
-                          DisplayFormat="d" />
-        @* later: kolom met knop "Openen" of zo *@
-    </Columns>
-</DxGrid>
 
 @code {
     private string? searchText;
     private List<ProjectModel> allProjects = new();
 
-    // Dit is de gefilterde lijst die de grid te zien krijgt
+    // Gefilterde lijst voor de grid
     private IEnumerable<ProjectModel> FilteredProjects =>
         string.IsNullOrWhiteSpace(searchText)
             ? allProjects
@@ -42,8 +129,8 @@
 
     protected override async Task OnInitializedAsync()
     {
-        // TODO: hier later je API-call doen
-        // bv: allProjects = await Http.GetFromJsonAsync<List<ProjectModel>>("api/projecten");
+        // TODO: later vervangen door API-call
+        // allProjects = await Http.GetFromJsonAsync<List<ProjectModel>>("api/projecten");
 
         allProjects = new()
         {
@@ -61,5 +148,28 @@
             }
             // ...
         };
+    }
+
+    private void OpenProject(ProjectModel project)
+    {
+        if (project?.Id > 0)
+            Navigation.NavigateTo($"/project/{project.Id}");
+    }
+
+    private void OnRowClick(GridRowClickEventArgs e)
+    {
+        // Haal de Id van de aangeklikte rij op via de Grid-API
+        var idObj = e.Grid.GetRowValue(e.VisibleIndex, nameof(ProjectModel.Id));
+
+        if (idObj is int id && id > 0)
+        {
+            Navigation.NavigateTo($"/project/{id}");
+        }
+    }
+
+    private void OnNieuwProject()
+    {
+        // TODO: later koppelen aan create-pagina of dialog
+        // b.v. Navigation.NavigateTo("/project/nieuw");
     }
 }

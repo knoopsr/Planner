@@ -10,9 +10,28 @@
     [Parameter] public string Id { get; set; } = "schedulerHost";
     [Parameter] public string Style { get; set; } = "height:700px; width:100%;";
 
+    [Parameter] public string ViewPresetKey { get; set; } = "Default";
+    [Parameter] public DateTime? StartDate { get; set; }
+    [Parameter] public DateTime? EndDate { get; set; }
+
+
+
+
     // Initiële data (optioneel, voor eerste load)
     [Parameter] public IEnumerable<ResourceDto> Resources { get; set; } = Array.Empty<ResourceDto>();
     [Parameter] public IEnumerable<SchedulerEventDto> Events { get; set; } = Array.Empty<SchedulerEventDto>();
+    [Parameter] public IEnumerable<SchedulerCalendarDto> Calendars { get; set; } = Array.Empty<SchedulerCalendarDto>();
+
+    [Parameter] public IEnumerable<SchedulerResourceTimeRangeDto> ResourceTimeRanges { get; set; } = Array.Empty<SchedulerResourceTimeRangeDto>();
+
+
+
+    [Parameter] public IEnumerable<SchedulerToolbarItemDto> ToolbarItems { get; set; } = Array.Empty<SchedulerToolbarItemDto>();
+    [Parameter] public IEnumerable<SchedulerEventMenuItemDto> EventMenuItems { get; set; } = Array.Empty<SchedulerEventMenuItemDto>();
+
+
+    [Parameter] public EventCallback OnJsReady { get; set; }
+
 
     // Callbacks naar buiten (Blazor code)
     [Parameter] public EventCallback<SchedulerEventDto> OnEventClick { get; set; }
@@ -22,8 +41,18 @@
     [Parameter] public EventCallback<List<int>> OnEventRemoved { get; set; }
     [Parameter] public EventCallback<EventDragPayloadDto> OnEventDragStart { get; set; }
     [Parameter] public EventCallback<EventDragPayloadDto> OnEventDrag { get; set; }
-    [Parameter] public EventCallback<EventDragPayloadDto> OnEventDrop { get; set; } 
+    [Parameter] public EventCallback<EventDropDto> OnEventDrop { get; set; }
     [Parameter] public EventCallback<UnplannedDropPayloadDto> OnUnplannedDrop { get; set; }
+
+    [Parameter] public EventCallback<string> OnHeaderButtonClick { get; set; }
+    [Parameter] public EventCallback<EventMenuClickDto> OnEventMenuClick { get; set; }
+    [Parameter] public EventCallback<SchedulerNotificationDto> OnNotification { get; set; }
+
+
+
+
+
+
 
 
     private DotNetObjectReference<SchedulerPro>? _dotNetRef;
@@ -37,17 +66,29 @@
 
             var config = new
             {
-                // hier kun je eventueel dynamische periode doorgeven
-                startDate = "2025-01-01",
-                endDate   = "2025-01-31",
+                startDate = StartDate ?? new DateTime(2025, 1, 1),
+                endDate = EndDate ?? new DateTime(2025, 1, 31),
+                viewPresetKey = ViewPresetKey,
                 resources = Resources,
-                events    = Events
+                events = Events,
+                toolbarItems = ToolbarItems,
+                eventMenuItems = EventMenuItems,
+                calendars = Calendars,
+                resourceTimeRanges = ResourceTimeRanges
             };
 
             await JS.InvokeVoidAsync("bryntumScheduler.init", Id, config, _dotNetRef);
             _initialized = true;
+
+            // pagina verwittigen dat JS / Bryntum klaar zijn
+            if (OnJsReady.HasDelegate)
+            {
+                await OnJsReady.InvokeAsync();
+            }
         }
     }
+
+
 
     // ====== JS -> C# ======
 
@@ -101,7 +142,7 @@
     }
 
     [JSInvokable]
-    public async Task OnEventDropFromJs(EventDragPayloadDto payload)
+    public async Task OnEventDropFromJs(EventDropDto payload)
     {
         if(OnEventDrop.HasDelegate)
             await OnEventDrop.InvokeAsync(payload);
@@ -113,6 +154,28 @@
         if (OnUnplannedDrop.HasDelegate)
             await OnUnplannedDrop.InvokeAsync(payload);
     }
+
+    [JSInvokable]
+    public async Task OnHeaderButtonClickFromJs(string actionId)
+    {
+        if (OnHeaderButtonClick.HasDelegate)        
+            await OnHeaderButtonClick.InvokeAsync(actionId);
+        
+    }
+
+    [JSInvokable]
+    public async Task OnEventMenuClickFromJs(EventMenuClickDto dto)
+    {
+        if (OnEventMenuClick.HasDelegate)
+            await OnEventMenuClick.InvokeAsync(dto);
+    }
+    [JSInvokable]
+    public async Task OnNotificationFromJs(SchedulerNotificationDto dto)
+    {
+        if (OnNotification.HasDelegate)
+            await OnNotification.InvokeAsync(dto);
+    }
+
 
 
 
@@ -137,7 +200,47 @@
         await JS.InvokeVoidAsync("bryntumScheduler.removeEvent", Id, id);
     }
 
+    public async Task ApplyFilterAsync(SchedulerFilterDto filter)
+    {
+        if (!_initialized) return;
+        await JS.InvokeVoidAsync("bryntumScheduler.setFilter", Id, filter);
+    }
 
+    public async Task SetViewPresetAsync(string key)
+    {
+        if (!_initialized) return;
+        await JS.InvokeVoidAsync("bryntumScheduler.setViewPreset", Id, key);
+    }
+
+    public async Task SetTimeSpanAsync(DateTime start, DateTime end)
+    {
+        if (!_initialized) return;
+        await JS.InvokeVoidAsync("bryntumScheduler.setTimeSpan", Id, start, end);
+    }
+    public async Task ApplyResourceFilterAsync(IEnumerable<int> resourceIds)
+    {
+        if (!_initialized) return;
+        await JS.InvokeVoidAsync("bryntumScheduler.setResourceFilter", Id, resourceIds);
+    }
+
+    public async Task ApplyEventFilterAsync(IEnumerable<int> eventIds)
+    {
+        if (!_initialized) return;
+
+        // object moet een property `visibleEventIds` hebben, want JS verwacht dat
+        var filter = new
+        {
+            visibleEventIds = eventIds.ToArray()
+        };
+
+        await JS.InvokeVoidAsync("bryntumScheduler.setFilter", Id, filter);
+    }
+
+    public async Task RecalcHeightAsync()
+    {
+        if (!_initialized) return;
+        await JS.InvokeVoidAsync("bryntumScheduler.recalcHeight", Id);
+    }
 
 
 

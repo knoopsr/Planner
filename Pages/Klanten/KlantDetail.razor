@@ -1,0 +1,382 @@
+﻿@page "/klant/{Id:int}"
+
+@using DevExpress.Blazor
+@using Models.Klanten
+@using DataService.Klanten
+@inject IKlantenService KlantenService
+@inject NavigationManager Navigation
+@inherits BlazorApp1.Shared.App.AppComponentBase
+
+
+<PageTitle>Klant details</PageTitle>
+
+<DxLoadingPanel @bind-Visible="isLoading"
+                IsContentBlocked="true"
+                ApplyBackgroundShading="true"
+                IndicatorAreaVisible="false"
+                Text="Klantgegevens laden...">
+
+    <div class="container-fluid p-3">
+
+        @if (!string.IsNullOrWhiteSpace(errorMessage))
+        {
+            <div class="alert alert-danger">
+                @errorMessage
+            </div>
+        }
+        else if (Klant is null && !isLoading)
+        {
+            <div class="alert alert-warning">
+                Klant met ID @Id werd niet gevonden.
+            </div>
+        }
+        else if (Klant is not null && editModel is not null)
+        {
+            <EditForm Model="@editModel" OnValidSubmit="HandleValidSubmit">
+                    <ChildContent Context="editCtx">
+                <DataAnnotationsValidator />
+                <ValidationSummary />
+
+                <!-- HEADER -->
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <div class="d-flex align-items-center gap-2">
+                        <DxButton RenderStyle="ButtonRenderStyle.Secondary"
+                                  Size="Size.Small"
+                                  Click="@TerugNaarOverzicht">
+                            <span class="bi bi-arrow-left me-1"></span>
+                            Terug
+                        </DxButton>
+
+                        <div>
+                            <h3 class="mb-0">
+                                @editModel.Naam @editModel.Achternaam
+                            </h3>
+                            <small class="text-muted">
+                                Klant ID: @editModel.Id
+                            </small>
+                        </div>
+                    </div>
+
+                    <div class="d-flex align-items-center gap-2">
+                        <span class="@GetStatusBadgeClass(editModel.IsActief)">
+                            @(editModel.IsActief ? "Actief" : "Inactief")
+                        </span>
+
+                        @if (!isEditMode)
+                        {
+                            <DxButton RenderStyle="ButtonRenderStyle.Primary"
+                                      Size="Size.Small"
+                                      Click="@StartEdit">
+                                <span class="bi bi-pencil-square me-1"></span>
+                                Bewerken
+                            </DxButton>
+                        }
+                        else
+                        {
+                            <button type="submit" class="btn btn-sm btn-primary">
+                                <span class="bi bi-save me-1"></span>
+                                Opslaan
+                            </button>
+                            <button type="button"
+                                    class="btn btn-sm btn-secondary ms-2"
+                                    @onclick="CancelEdit">
+                                <span class="bi bi-x-circle me-1"></span>
+                                Annuleren
+                            </button>
+                        }
+                    </div>
+                </div>
+
+                <div class="row">
+                    <!-- CONTACTGEGEVENS -->
+                    <div class="col-lg-6 mb-3">
+                        <div class="card shadow-sm h-100">
+                            <div class="card-header">
+                                <strong>Contactgegevens</strong>
+                            </div>
+                            <div class="card-body">
+                                @if (!isEditMode)
+                                {
+                                    <dl class="row mb-0">
+                                        <dt class="col-sm-4">Voornaam</dt>
+                                        <dd class="col-sm-8">@editModel.Naam</dd>
+
+                                        <dt class="col-sm-4">Achternaam</dt>
+                                        <dd class="col-sm-8">@editModel.Achternaam</dd>
+
+                                        <dt class="col-sm-4">GSM</dt>
+                                        <dd class="col-sm-8">@(!string.IsNullOrWhiteSpace(editModel.Gsm) ? editModel.Gsm : "-")</dd>
+
+                                        <dt class="col-sm-4">E-mail</dt>
+                                        <dd class="col-sm-8">
+                                            @if (!string.IsNullOrWhiteSpace(editModel.Email))
+                                            {
+                                                <a href="mailto:@editModel.Email">@editModel.Email</a>
+                                            }
+                                            else
+                                            {
+                                                <span>-</span>
+                                            }
+                                        </dd>
+
+                                        <dt class="col-sm-4">Status</dt>
+                                        <dd class="col-sm-8">
+                                            <span class="@GetStatusBadgeClass(editModel.IsActief)">
+                                                @(editModel.IsActief ? "Actief" : "Inactief")
+                                            </span>
+                                        </dd>
+                                    </dl>
+                                }
+                                else
+                                {
+                                    <div class="mb-3">
+                                        <label class="form-label">Voornaam</label>
+                                        <InputText class="form-control" @bind-Value="editModel.Naam" />
+                                        <ValidationMessage For="@(() => editModel.Naam)" />
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label class="form-label">Achternaam</label>
+                                        <InputText class="form-control" @bind-Value="editModel.Achternaam" />
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label class="form-label">GSM</label>
+                                        <InputText class="form-control" @bind-Value="editModel.Gsm" />
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label class="form-label">E-mail</label>
+                                        <InputText class="form-control" @bind-Value="editModel.Email" />
+                                        <ValidationMessage For="@(() => editModel.Email)" />
+                                    </div>
+
+                                    <div class="form-check mt-2">
+                                        <InputCheckbox class="form-check-input" @bind-Value="editModel.IsActief" />
+                                        <label class="form-check-label">Actieve klant</label>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- ADRES -->
+                    <div class="col-lg-6 mb-3">
+                        <div class="card shadow-sm h-100">
+                            <div class="card-header">
+                                <strong>Adres</strong>
+                            </div>
+                            <div class="card-body">
+                                @if (!isEditMode)
+                                {
+                                    <dl class="row mb-0">
+                                        <dt class="col-sm-4">Straat</dt>
+                                        <dd class="col-sm-8">
+                                            @{
+                                                var straatLijn = BuildStraatLijn(editModel);
+                                            }
+                                        @(string.IsNullOrWhiteSpace(straatLijn) ? "-" : straatLijn)
+                                    </dd>
+
+                                    <dt class="col-sm-4">Postcode</dt>
+                                    <dd class="col-sm-8">
+                                        @(!string.IsNullOrWhiteSpace(editModel.Postcode)
+                                                                            ? editModel.Postcode
+                                                                            : "-")
+                                                                              </dd>
+
+                                    <dt class="col-sm-4">Gemeente</dt>
+                                    <dd class="col-sm-8">
+                                        @(!string.IsNullOrWhiteSpace(editModel.Gemeente)
+                                                                            ? editModel.Gemeente
+                                                                            : "-")
+                                                                              </dd>
+
+                                    <dt class="col-sm-4">Land</dt>
+                                    <dd class="col-sm-8">
+                                        @(!string.IsNullOrWhiteSpace(editModel.Land)
+                                                                            ? editModel.Land
+                                                                            : "-")
+                                </dd>
+                            </dl>
+                                                        }
+                                else
+                                {
+                                    <div class="mb-3">
+                                        <label class="form-label">Straat</label>
+                                        <InputText class="form-control" @bind-Value="editModel.Straat" />
+                                    </div>
+
+                                    <div class="row">
+                                        <div class="col-sm-6 mb-3">
+                                            <label class="form-label">Nummer</label>
+                                            <InputNumber class="form-control" @bind-Value="editModel.Nummer" />
+                                        </div>
+                                        <div class="col-sm-6 mb-3">
+                                            <label class="form-label">Busnummer</label>
+                                            <InputText class="form-control" @bind-Value="editModel.Busnummer" />
+                                        </div>
+                                    </div>
+
+                                    <div class="row">
+                                        <div class="col-sm-4 mb-3">
+                                            <label class="form-label">Postcode</label>
+                                            <InputText class="form-control" @bind-Value="editModel.Postcode" />
+                                        </div>
+                                        <div class="col-sm-8 mb-3">
+                                            <label class="form-label">Gemeente</label>
+                                            <InputText class="form-control" @bind-Value="editModel.Gemeente" />
+                                        </div>
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label class="form-label">Land</label>
+                                        <InputText class="form-control" @bind-Value="editModel.Land" />
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ACTIES (onderaan kun je laten zoals eerder, eventueel later uitbreiden) -->
+                </ChildContent>
+            </EditForm>
+        }
+    </div>
+
+</DxLoadingPanel>
+
+@code {
+    [Parameter] public int Id { get; set; }
+
+    private bool isLoading;
+    private bool isEditMode;
+    private string? errorMessage;
+    private KlantenModel? Klant;
+    private KlantenModel? editModel;
+
+    protected override async Task OnParametersSetAsync()
+    {
+        isLoading = true;
+        errorMessage = null;
+        Klant = null;
+        editModel = null;
+        isEditMode = false;
+
+        try
+        {
+            Klant = await KlantenService.GetByIdAsync(Id);
+
+            if (Klant is null)
+            {
+                errorMessage = $"Klant met ID {Id} werd niet gevonden.";
+            }
+            else
+            {
+                // kopie maken voor het formulier
+                editModel = CloneKlant(Klant);
+            }
+        }
+        catch
+        {
+            errorMessage = "Er is een fout opgetreden bij het laden van de klantgegevens.";
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+    private KlantenModel CloneKlant(KlantenModel source) =>
+        new()
+        {
+            Id = source.Id,
+            Naam = source.Naam,
+            Achternaam = source.Achternaam,
+            Straat = source.Straat,
+            Nummer = source.Nummer,
+            Busnummer = source.Busnummer,
+            Postcode = source.Postcode,
+            Gemeente = source.Gemeente,
+            Land = source.Land,
+            Gsm = source.Gsm,
+            Email = source.Email,
+            IsActief = source.IsActief
+        };
+
+    private string BuildStraatLijn(KlantenModel m)
+    {
+        if (string.IsNullOrWhiteSpace(m.Straat)) return string.Empty;
+
+        var straatLijn = m.Straat;
+
+        if (m.Nummer.HasValue && m.Nummer.Value > 0)
+            straatLijn += $" {m.Nummer.Value}";
+
+        if (!string.IsNullOrWhiteSpace(m.Busnummer))
+            straatLijn += $" bus {m.Busnummer}";
+
+        return straatLijn;
+    }
+
+    private string GetStatusBadgeClass(bool isActief) =>
+        isActief ? "badge bg-success" : "badge bg-secondary";
+
+    private void TerugNaarOverzicht()
+        => Navigation.NavigateTo("/klanten");
+
+    private void StartEdit()
+    {
+        if (Klant is null) return;
+        editModel = CloneKlant(Klant);
+        isEditMode = true;
+    }
+
+    private void CancelEdit()
+    {
+        if (Klant is null) return;
+        editModel = CloneKlant(Klant);
+        isEditMode = false;
+    }
+
+    private async Task HandleValidSubmit()
+    {
+        if (editModel is null) return;
+
+        isLoading = true;
+        errorMessage = null;
+
+        try
+        {
+            var updated = await KlantenService.UpdateAsync(editModel);
+
+            if (updated is null)
+            {
+                errorMessage = "Klant kon niet worden opgeslagen.";
+
+                ShowErrorToast("Klant kon niet worden opgeslagen.", "Opslaan mislukt");
+
+                return; // op dezelfde pagina blijven
+            }
+
+            // success: model updaten + toast tonen
+            Klant = updated;
+            editModel = CloneKlant(updated);
+            isEditMode = false;
+            ShowSuccessToast("De klantgegevens zijn succesvol opgeslagen.", "Opgeslagen");
+
+        }
+        catch (Exception ex)
+        {
+            errorMessage = "Er is een fout opgetreden bij het opslaan van de klant.";
+
+            ShowErrorToast("Er is een fout opgetreden bij het opslaan van de klant.", "Fout bij opslaan");
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+}

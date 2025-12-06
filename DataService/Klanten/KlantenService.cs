@@ -34,7 +34,7 @@ namespace DataService.Klanten
             return result ?? new();
         }
 
-        public async Task<KlantenModel?> GetKlantByIdAsync(int id, CancellationToken ct = default)
+        public async Task<KlantenModel?> GetByIdAsync(int id, CancellationToken ct = default)
         {
             var response = await _http.GetAsync($"api/klanten/{id}", ct);
             if (!response.IsSuccessStatusCode)
@@ -43,5 +43,23 @@ namespace DataService.Klanten
             return await response.Content
                 .ReadFromJsonAsync<KlantenModel>(cancellationToken: ct);
         }
+
+        public async Task<KlantenModel?> UpdateAsync(KlantenModel klant, CancellationToken ct = default)
+        {
+            // Ik ga uit van een REST-achtige endpoint:
+            // PUT api/klanten/{id}
+            var response = await _http.PutAsJsonAsync($"api/klanten/{klant.Id}", klant, ct);
+
+            if (!response.IsSuccessStatusCode)
+            {
+                // hier kan je nog logging doen of exceptions gooien
+                return null;
+            }
+
+            return await response.Content.ReadFromJsonAsync<KlantenModel>(cancellationToken: ct);
+        }
+
+
+
     }
 }

@@ -1,0 +1,537 @@
+{
+  "workTypes": [
+    {
+      "id": 1,
+      "name": "Chape"
+    },
+    {
+      "id": 2,
+      "name": "Metselwerken"
+    },
+    {
+      "id": 3,
+      "name": "Graafwerken"
+    },
+    {
+      "id": 4,
+      "name": "Ruwbouw"
+    },
+    {
+      "id": 5,
+      "name": "Afwerking"
+    },
+    {
+      "id": 6,
+      "name": "Funderingen"
+    },
+    {
+      "id": 7,
+      "name": "Dakwerken"
+    },
+    {
+      "id": 8,
+      "name": "Renovatiewerken"
+    }
+  ],
+  "resources": [
+    {
+      "id": 1,
+      "name": "Ploeg 1 - Chape & Graaf",
+      "workTypeIds": [ 1, 3 ],
+      "calendar": "ploeg_dag",
+      "crewFactor": 2
+    },
+    {
+      "id": 2,
+      "name": "Ploeg 2 - Metsel & Ruwbouw",
+      "workTypeIds": [ 2, 4 ],
+      "calendar": "ploeg_nacht",
+      "crewFactor": 1
+    },
+    {
+      "id": 3,
+      "name": "Ploeg 3 - Graaf & Fundering",
+      "workTypeIds": [ 3, 6 ],
+      "calendar": "ploeg_dag",
+      "crewFactor": 1
+    },
+    {
+      "id": 4,
+      "name": "Ploeg 4 - Ruwbouw",
+      "workTypeIds": [ 4 ],
+      "calendar": "ploeg_laat",
+      "crewFactor": 1
+    },
+    {
+      "id": 5,
+      "name": "Ploeg 5 - Afwerking & Renovatiewerken",
+      "workTypeIds": [ 5, 8 ],
+      "calendar": "ploeg_laat",
+      "crewFactor": 1
+    },
+    {
+      "id": 6,
+      "name": "Ploeg 6 - Dak & Ruwbouw",
+      "workTypeIds": [ 4, 7 ],
+      "calendar": "ploeg_nacht",
+      "crewFactor": 1
+    },
+    {
+      "id": 7,
+      "name": "Ploeg 7 - Chape & Afwerking",
+      "workTypeIds": [ 1, 5 ],
+      "calendar": "ploeg_dag",
+      "crewFactor": 1
+    },
+    {
+      "id": 8,
+      "name": "Ploeg 8 - Metsel & Graaf",
+      "workTypeIds": [ 2, 3 ],
+      "calendar": "ploeg_laat",
+      "crewFactor": 1
+    },
+    {
+      "id": 9,
+      "name": "Ploeg 9 - Fundering & Ruwbouw",
+      "workTypeIds": [ 4, 6 ],
+      "calendar": "ploeg_nacht",
+      "crewFactor": 1
+    },
+    {
+      "id": 10,
+      "name": "Ploeg 10 - Dak & Afwerking",
+      "workTypeIds": [ 5, 7 ],
+      "calendar": "ploeg_laat",
+      "crewFactor": 1
+    }
+  ],
+  "events": [
+    {
+      "id": 1,
+      "name": "Project 1001 - Chape gelijkvloers",
+      "resourceId": 1,
+      "startDate": "2025-01-02T07:00:00",
+      "endDate": "2025-01-02T15:30:00",
+      "projectId": 1001,
+      "totalHours": 20
+    },
+    {
+      "id": 2,
+      "name": "Project 1002 - Graafwerken oprit",
+      "resourceId": 1,
+      "startDate": "2025-01-06T07:00:00",
+      "endDate": "2025-01-06T16:00:00",
+      "projectId": 1002,
+      "totalHours": 40
+    },
+    {
+      "id": 3,
+      "name": "Project 1003 - Chape verdieping 1",
+      "resourceId": 1,
+      "startDate": "2025-01-10T07:30:00",
+      "endDate": "2025-01-11T15:00:00",
+      "projectId": 1003,
+      "totalHours": 60
+    },
+    {
+      "id": 4,
+      "name": "Project 1004 - Graafwerken fundering",
+      "resourceId": 1,
+      "startDate": "2025-01-15T07:00:00",
+      "endDate": "2025-01-15T17:00:00",
+      "projectId": 1004,
+      "totalHours": 20
+    },
+
+    {
+      "id": 5,
+      "name": "Project 2001 - Metselwerken woning A",
+      "resourceId": 2,
+      "startDate": "2025-01-05T07:00:00",
+      "endDate": "2025-01-07T16:00:00",
+      "projectId": 2001,
+      "totalHours": 50
+    },
+    {
+      "id": 6,
+      "name": "Project 2002 - Ruwbouw magazijn",
+      "resourceId": 2,
+      "startDate": "2025-01-12T07:00:00",
+      "endDate": "2025-01-14T16:00:00",
+      "projectId": 2002,
+      "totalHours": 8
+    },
+    {
+      "id": 7,
+      "name": "Project 2003 - Metselwerken tuinmuur",
+      "resourceId": 2,
+      "startDate": "2025-01-20T08:00:00",
+      "endDate": "2025-01-20T16:00:00",
+      "projectId": 2003,
+      "totalHours": 16
+    },
+    {
+      "id": 8,
+      "name": "Project 2004 - Ruwbouw appartementen",
+      "resourceId": 2,
+      "startDate": "2025-01-27T07:00:00",
+      "endDate": "2025-01-29T16:00:00",
+      "projectId": 2004,
+      "totalHours": 16
+    },
+
+    {
+      "id": 9,
+      "name": "Project 3001 - Graafwerken kelder",
+      "resourceId": 3,
+      "startDate": "2025-01-03T07:00:00",
+      "endDate": "2025-01-04T16:00:00",
+      "projectId": 3001,
+      "totalHours": 16
+    },
+    {
+      "id": 10,
+      "name": "Project 3002 - Fundering loods",
+      "resourceId": 3,
+      "startDate": "2025-01-08T07:00:00",
+      "endDate": "2025-01-09T15:30:00",
+      "projectId": 3002,
+      "totalHours": 16
+    },
+    {
+      "id": 11,
+      "name": "Project 3003 - Graafwerken riolering",
+      "resourceId": 3,
+      "startDate": "2025-01-16T07:00:00",
+      "endDate": "2025-01-16T17:00:00",
+      "projectId": 3003,
+      "totalHours": 16
+    },
+    {
+      "id": 12,
+      "name": "Project 3004 - Fundering woning B",
+      "resourceId": 3,
+      "startDate": "2025-01-22T07:00:00",
+      "endDate": "2025-01-23T16:00:00",
+      "projectId": 3004,
+      "totalHours": 16
+    },
+
+    {
+      "id": 13,
+      "name": "Project 4001 - Ruwbouw woning C",
+      "resourceId": 4,
+      "startDate": "2025-01-06T07:00:00",
+      "endDate": "2025-01-09T16:00:00",
+      "projectId": 4001,
+      "totalHours": 16
+    },
+    {
+      "id": 14,
+      "name": "Project 4002 - Ruwbouw kantoor",
+      "resourceId": 4,
+      "startDate": "2025-01-13T07:00:00",
+      "endDate": "2025-01-15T16:00:00",
+      "projectId": 4002,
+      "totalHours": 16
+    },
+    {
+      "id": 15,
+      "name": "Project 4003 - Ruwbouw uitbreiding",
+      "resourceId": 4,
+      "startDate": "2025-01-21T07:00:00",
+      "endDate": "2025-01-22T16:00:00",
+      "projectId": 4003,
+      "totalHours": 16
+    },
+    {
+      "id": 16,
+      "name": "Project 4004 - Ruwbouw garage",
+      "resourceId": 4,
+      "startDate": "2025-01-28T07:30:00",
+      "endDate": "2025-01-29T15:30:00",
+      "projectId": 4004,
+      "totalHours": 16
+    },
+
+    {
+      "id": 17,
+      "name": "Project 5001 - Binnenafwerking woning A",
+      "resourceId": 5,
+      "startDate": "2025-01-04T08:00:00",
+      "endDate": "2025-01-05T16:00:00",
+      "projectId": 5001,
+      "totalHours": 16
+    },
+    {
+      "id": 18,
+      "name": "Project 5002 - Renovatie badkamer",
+      "resourceId": 5,
+      "startDate": "2025-01-11T08:00:00",
+      "endDate": "2025-01-12T16:00:00",
+      "projectId": 5002,
+      "totalHours": 16
+    },
+    {
+      "id": 19,
+      "name": "Project 5003 - Afwerking kantoorruimte",
+      "resourceId": 5,
+      "startDate": "2025-01-18T08:00:00",
+      "endDate": "2025-01-19T16:00:00",
+      "projectId": 5003,
+      "totalHours": 16
+    },
+    {
+      "id": 20,
+      "name": "Project 5004 - Renovatie leefruimte",
+      "resourceId": 5,
+      "startDate": "2025-01-25T08:00:00",
+      "endDate": "2025-01-26T16:00:00",
+      "projectId": 5004,
+      "totalHours": 16
+    },
+
+    {
+      "id": 21,
+      "name": "Project 6001 - Dakwerken woning D",
+      "resourceId": 6,
+      "startDate": "2025-01-03T07:30:00",
+      "endDate": "2025-01-04T16:00:00",
+      "projectId": 6001,
+      "totalHours": 16
+    },
+    {
+      "id": 22,
+      "name": "Project 6002 - Dakrenovatie loods",
+      "resourceId": 6,
+      "startDate": "2025-01-10T07:30:00",
+      "endDate": "2025-01-11T16:00:00",
+      "projectId": 6002,
+      "totalHours": 16
+    },
+    {
+      "id": 23,
+      "name": "Project 6003 - Dak isolatie",
+      "resourceId": 6,
+      "startDate": "2025-01-17T07:30:00",
+      "endDate": "2025-01-17T16:00:00",
+      "projectId": 6003,
+      "totalHours": 16
+    },
+    {
+      "id": 24,
+      "name": "Project 6004 - Dakwerken magazijn",
+      "resourceId": 6,
+      "startDate": "2025-01-24T07:30:00",
+      "endDate": "2025-01-25T16:00:00",
+      "projectId": 6004,
+      "totalHours": 16
+    },
+
+    {
+      "id": 25,
+      "name": "Project 7001 - Chape garage",
+      "resourceId": 7,
+      "startDate": "2025-01-02T07:00:00",
+      "endDate": "2025-01-02T15:00:00",
+      "projectId": 7001,
+      "totalHours": 16
+    },
+    {
+      "id": 26,
+      "name": "Project 7002 - Afwerking zolder",
+      "resourceId": 7,
+      "startDate": "2025-01-09T08:00:00",
+      "endDate": "2025-01-09T16:00:00",
+      "projectId": 7002,
+      "totalHours": 16
+    },
+    {
+      "id": 27,
+      "name": "Project 7003 - Chape terras",
+      "resourceId": 7,
+      "startDate": "2025-01-16T07:00:00",
+      "endDate": "2025-01-16T15:00:00",
+      "projectId": 7003,
+      "totalHours": 16
+    },
+    {
+      "id": 28,
+      "name": "Project 7004 - Binnenafwerking renovatie",
+      "resourceId": 7,
+      "startDate": "2025-01-23T08:00:00",
+      "endDate": "2025-01-23T16:00:00",
+      "projectId": 7004,
+      "totalHours": 16
+    },
+
+    {
+      "id": 29,
+      "name": "Project 8001 - Metselwerken garage",
+      "resourceId": 8,
+      "startDate": "2025-01-05T07:30:00",
+      "endDate": "2025-01-05T16:00:00",
+      "projectId": 8001,
+      "totalHours": 16
+    },
+    {
+      "id": 30,
+      "name": "Project 8002 - Graafwerken oprit",
+      "resourceId": 8,
+      "startDate": "2025-01-13T07:30:00",
+      "endDate": "2025-01-13T16:00:00",
+      "projectId": 8002,
+      "totalHours": 16
+    },
+    {
+      "id": 31,
+      "name": "Project 8003 - Metselwerken keldermuur",
+      "resourceId": 8,
+      "startDate": "2025-01-19T07:30:00",
+      "endDate": "2025-01-20T16:00:00",
+      "projectId": 8003,
+      "totalHours": 16
+    },
+    {
+      "id": 32,
+      "name": "Project 8004 - Graafwerken vijver",
+      "resourceId": 8,
+      "startDate": "2025-01-27T07:30:00",
+      "endDate": "2025-01-27T16:00:00",
+      "projectId": 8004,
+      "totalHours": 16
+    },
+
+    {
+      "id": 33,
+      "name": "Project 9001 - Fundering appartementenblok",
+      "resourceId": 9,
+      "startDate": "2025-01-06T07:00:00",
+      "endDate": "2025-01-08T16:00:00",
+      "projectId": 9001,
+      "totalHours": 16
+    },
+    {
+      "id": 34,
+      "name": "Project 9002 - Ruwbouw verdieping 1",
+      "resourceId": 9,
+      "startDate": "2025-01-14T07:00:00",
+      "endDate": "2025-01-16T16:00:00",
+      "projectId": 9002,
+      "totalHours": 16
+    },
+    {
+      "id": 35,
+      "name": "Project 9003 - Fundering woning E",
+      "resourceId": 9,
+      "startDate": "2025-01-21T07:00:00",
+      "endDate": "2025-01-22T16:00:00",
+      "projectId": 9003,
+      "totalHours": 16
+    },
+    {
+      "id": 36,
+      "name": "Project 9004 - Ruwbouw garageboxen",
+      "resourceId": 9,
+      "startDate": "2025-01-28T07:00:00",
+      "endDate": "2025-01-29T16:00:00",
+      "projectId": 9004,
+      "totalHours": 16
+    },
+
+    {
+      "id": 37,
+      "name": "Project 10001 - Dakwerken villa",
+      "resourceId": 10,
+      "startDate": "2025-01-07T07:30:00",
+      "endDate": "2025-01-08T16:00:00",
+      "projectId": 10001,
+      "totalHours": 16
+    },
+    {
+      "id": 38,
+      "name": "Project 10002 - Binnenafwerking villa",
+      "resourceId": 10,
+      "startDate": "2025-01-15T08:00:00",
+      "endDate": "2025-01-17T16:00:00",
+      "projectId": 10002,
+      "totalHours": 16
+    },
+    {
+      "id": 39,
+      "name": "Project 10003 - Dakrenovatie school",
+      "resourceId": 10,
+      "startDate": "2025-01-22T07:30:00",
+      "endDate": "2025-01-23T16:00:00",
+      "projectId": 10003,
+      "totalHours": 16
+    },
+    {
+      "id": 40,
+      "name": "Project 10004 - Afwerking inkomhal",
+      "resourceId": 10,
+      "startDate": "2025-01-30T08:00:00",
+      "endDate": "2025-01-30T16:00:00",
+      "projectId": 10004,
+      "totalHours": 16
+    }
+  ],
+  "calendars": [
+    {
+      "id": "general",
+      "name": "Standaard",
+      "unspecifiedTimeIsWorkingTime": false,
+      "intervals": [
+        {
+          "recurrentStartDate": "on Mon at 08:00",
+          "recurrentEndDate": "on Fri at 16:00",
+          "isWorking": true
+        },
+        {
+          "recurrentStartDate": "on Sat at 00:00",
+          "recurrentEndDate": "on Mon at 00:00",
+          "isWorking": false
+        }
+      ]
+    },
+    {
+      "id": "ploeg_dag",
+      "name": "Ploeg dag",
+      "parentId": "general"
+    },
+    {
+      "id": "ploeg_laat",
+      "name": "Ploeg laat",
+      "parentId": "general"
+    },
+    {
+      "id": "ploeg_nacht",
+      "name": "Ploeg nacht",
+      "parentId": "general",
+      "intervals": [
+        {
+          "recurrentStartDate": "on Sun at 22:00",
+          "recurrentEndDate": "on Fri at 06:00",
+          "isWorking": true
+        }
+      ]
+    }
+  ],
+  "resourceTimeRanges": [
+    {
+      "id": 1,
+      "resourceId": 1,
+      "startDate": "2025-01-04T00:00:00",
+      "endDate": "2025-01-04T23:59:59",
+      "cssClass": "not-working"
+    },
+    {
+      "id": 2,
+      "resourceId": 2,
+      "startDate": "2025-01-05T00:00:00",
+      "endDate": "2025-01-05T23:59:59",
+      "cssClass": "not-working"
+    }
+  ]
+
+}

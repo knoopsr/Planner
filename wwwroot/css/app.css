@@ -260,3 +260,46 @@ code {
 #schedulerHost {
     flex: 1;
 }
+
+
+
+.b-sch-tooltip .mp-tip-body {
+    white-space: pre-line; /* \n => echte regelafbreking */
+    font-size: 12px;
+}
+
+.b-sch-tooltip.mp-event-tooltip {
+    width: 420px; /* vaste breedte */
+    max-width: 420px; /* optioneel */
+
+    height: 260px;
+    /* max-height bv.: */
+    max-height: 260px;
+       overflow-y: auto; */
+}
+
+    /* Binnenste content (padding / layout) */
+    .b-sch-tooltip.mp-event-tooltip .b-tooltip-content {
+        padding: 8px 10px;
+    }
+
+
+/* Verberg de dependency terminals (de bolletjes) */
+.b-sch-dependency-terminal {
+    display: none !important;
+}
+
+/* Voor het geval je een oudere / andere classnaam hebt: */
+.b-sch-terminal {
+    display: none !important;
+}
+
+/* algemene styling van resource time ranges */
+.b-sch-resourcetimerange.not-working {
+    background-color: rgba(220, 0, 0, 0.10);
+}
+
+/* eventueel ander type, bv. ploeg in opleiding */
+.b-sch-resourcetimerange.training {
+    background-color: rgba(0, 120, 255, 0.12);
+}

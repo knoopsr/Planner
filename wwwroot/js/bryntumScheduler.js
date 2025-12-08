@@ -10,8 +10,15 @@ window.bryntumScheduler = (function () {
         DragHelper,
         DateHelper,
         StringHelper,
-        DomHelper
+        DomHelper,
+        LocaleManager
     } = bryntum.schedulerpro;
+
+
+    if (LocaleManager) {
+        LocaleManager.locale = 'Nl';
+    }
+    DateHelper.locale = 'nl';
 
 
     const viewPresets = {
@@ -29,34 +36,39 @@ window.bryntumScheduler = (function () {
             displayDateFormat: 'DD/MM HH:mm'
         },
 
-        // Werkweek (ma–vr)
+
         WorkWeek: {
-            base: 'hourAndDay',
-            tickWidth: 20,
+            base: 'dayAndWeek',
+            tickWidth: 30,
+            defaultSpan: 3,
             timeResolution: { unit: 'minute', increment: 15 },
             headers: [
-                { unit: 'month', align: 'start', dateFormat: 'MMM yyyy' },
-                {
-                    unit: 'week',
-                    renderer: d => `WK${DateHelper.format(d, 'WW')}`
-                },
-                {
-                    unit: 'day',
-                    renderer: d => DateHelper.format(d, 'ddd DD/MM')
-                },
-                { unit: 'hour', dateFormat: 'HH' }
+                { unit: 'month', align: 'center', dateFormat: 'MMM YYYY' },
+                { unit: 'week', renderer: (startDate) => `WK${DateHelper.format(startDate, 'WW')}` },
+                { unit: 'day', dateFormat: 'DD dd' }
+         
             ],
-            shiftUnit: 'day',
-            shiftIncrement: 7,
+            shiftUnit: 'week',
+            shiftIncrement: 1,
             displayDateFormat: 'HH:mm'
         },
-
-        // Bijvoorbeeld heel project in weken
+        Maand: {
+            base: 'weekAndDay',
+            tickWidth: 40,
+            headers: [
+                { unit: 'month', dateFormat: 'MMM YYYY' },
+                { unit: 'week', renderer: (startDate) => `WK${DateHelper.format(startDate, 'WW')}` },
+                { unit: 'day', dateFormat: 'DD' }
+            ],
+            shiftUnit: 'week',
+            shiftIncrement: 4,
+            displayDateFormat: 'DD/MM'
+        },
         ProjectWeeks: {
             base: 'weekAndDay',
             tickWidth: 40,
             headers: [
-                { unit: 'month', dateFormat: 'MMM yyyy' },
+                { unit: 'month', dateFormat: 'MMM YYYY' },
                 { unit: 'week', dateFormat: 'WW' }
             ],
             shiftUnit: 'week',
@@ -324,12 +336,15 @@ window.bryntumScheduler = (function () {
                             }
                         }
                     });
-                    break;
+                break;
             }
         });
 
         return result;
     }
+
+
+
     function buildEventMenuItems(config, dotNetRef) {
         const itemsCfg = (config && Array.isArray(config.eventMenuItems))
             ? config.eventMenuItems
@@ -477,22 +492,16 @@ window.bryntumScheduler = (function () {
             autoHeight: false,
             height: calcHeight(),
             flex: 1,
-
             eventStyle: 'colored',
-
             createEventOnDblClick: false,
             createEventOnDrag: false,
-
-
+            autoAdjustTimeAxis: false,
+            weekStartDay: 1,
             startDate: config.startDate ? new Date(config.startDate) : new Date(),
             endDate: config.endDate ? new Date(config.endDate) : new Date(),
-
             viewPreset: resolveViewPreset(config), 
-
-
             resources: config.resources || [],
             events: config.events || [],
-
             features: {
                 resourceTimeRanges: true,
                 nonWorkingTime: true, 
@@ -550,7 +559,6 @@ window.bryntumScheduler = (function () {
                 }
        
             },
-
             project: {
                 calendar: 'general',
                 calendarManagerStore: {
@@ -576,14 +584,10 @@ window.bryntumScheduler = (function () {
                         ]
                 }
             },
-
-
             tbar: buildToolbar(config, dotNetRef),
-
             columns: config.columns || [
                 { text: 'Naam', field: 'name', width: 150 }
             ],
-
             listeners: {
                 beforeEventDrag({ eventRecords }) {
                     const hasLocked = eventRecords.some(ev => ev.isLocked === true);

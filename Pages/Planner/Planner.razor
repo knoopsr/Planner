@@ -1,0 +1,124 @@
+﻿@page "/planner"
+@using BlazorApp1.Helper
+@using BlazorApp1.Shared
+@using BlazorApp1.Shared.App
+@using Models.SchedulerPro
+@inject HttpClient Http
+@inherits AppComponentBase
+
+
+<DxPopup @bind-Visible="IsFilterPopupVisible"
+         ShowCloseButton="true"
+         CloseOnOutsideClick="true"
+         AllowDrag="true"
+         Width="800px"
+         Height="500px"
+         HeaderText="Filter planner">
+    <BodyTemplate Context="popupCtx">
+        <DxFormLayout>
+
+            <!-- PERIODE -->
+            <DxFormLayoutItem Caption="Periode">
+                <div class="d-flex gap-2">
+                    <DxDateEdit @bind-Date="FilterStart"
+                                DisplayFormat="dd/MM/yyyy"
+                                PickerDisplayMode="@DatePickerDisplayMode.Calendar" />
+                    <span>t/m</span>
+                    <DxDateEdit @bind-Date="FilterEnd"
+                                DisplayFormat="dd/MM/yyyy"
+                                PickerDisplayMode="@DatePickerDisplayMode.Calendar" />
+                    <DxButton Text="Toepassen"
+                              CssClass="ms-2"
+                              Click="@ApplyDateRangeAsync" />
+                </div>
+            </DxFormLayoutItem>
+
+            <!-- SNELKEUZE PERIODE -->
+            <DxFormLayoutItem Caption="Snelkeuze">
+                <div class="d-flex flex-wrap gap-2">
+                    <DxButton Text="Deze week" Click="@ToonDezeWeek" />
+                    <DxButton Text="Volgende week" Click="@ToonVolgendeWeek" />
+                    <DxButton Text="Deze maand" Click="@ToonDezeMaand" />
+                </div>
+            </DxFormLayoutItem>
+
+            <!-- WEERGAVE -->
+            <DxFormLayoutItem Caption="Weergave">
+                <div class="d-flex gap-2">
+                    <DxButton Text="Werkweek" Click="@ToonWerkweek" />
+                    <DxButton Text="Project in weken" Click="@ToonProjectWeeks" />
+                </div>
+            </DxFormLayoutItem>
+
+            <!-- NIEUW: FILTER OP RESOURCES -->
+            <DxFormLayoutItem Caption="Ploegen zoeken">
+                <DxTextBox @bind-Text="ResourceSearchText"
+                           Placeholder="Zoek op naam van ploeg..." />
+            </DxFormLayoutItem>
+
+            <DxFormLayoutItem Caption="Zoek in projecten">
+                <DxTextBox @bind-Text="EventSearchText"
+                           Placeholder="Zoek in naam / project..." />
+            </DxFormLayoutItem>
+
+
+            <DxFormLayoutItem Caption="Werktypes">
+                <DxTagBox Data="@WorkTypes"
+                          TextFieldName="Name"
+                          ValueFieldName="Id"
+                          @bind-Values="SelectedWorkTypeIds"
+                          ShowClearButton="true"
+                          ShowDropDownButton="true"
+                          ApplyValueMode="UseButtons"
+                          Width="100%" />
+            </DxFormLayoutItem>
+
+            <DxFormLayoutItem Caption="">
+                <DxButton Text="Filter toepassen"
+                          CssClass="mt-2"
+                          Click="@ApplyResourceFilterAsync" />
+            </DxFormLayoutItem>
+
+            <DxFormLayoutItem Caption="">
+                <DxButton Text="Event-filter toepassen"
+                          CssClass="mt-2"
+                          Click="@ApplyEventSearchFilterAsync" />
+            </DxFormLayoutItem>
+
+
+        </DxFormLayout>
+    </BodyTemplate>
+</DxPopup>
+
+@if (_isLoaded)
+{
+    <div class="planner-full">
+        <SchedulerPro @ref="Scheduler"
+                      Resources="Resources"
+                      Events="Events"
+                      Calendars="Calendars"
+                      ResourceTimeRanges="ResourceTimeRanges"
+                      ViewPresetKey="WorkWeek"
+                      ToolbarItems="Toolbar"
+                      EventMenuItems="EventMenu"
+                      OnEventClick="HandleEventClick"
+                      OnEventDblClick="HandleEventDblClick"
+                      OnEventAdded="HandleEventAdded"
+                      OnEventUpdated="HandleEventUpdated"
+                      OnEventRemoved="HandleEventRemoved"
+                      OnEventDragStart="HandleEventDragStart"
+                      OnEventDrag="HandleEventDrag"
+                      OnEventDrop="HandleEventDrop"
+                      OnUnplannedDrop="HandleUnplannedDrop"
+                      OnHeaderButtonClick="HandleHeaderButtonClick"
+                      OnJsReady="SchedulerReady"
+                      OnEventMenuClick="HandleEventMenuClick"
+                      OnNotification="HandleSchedulerNotification" />
+    </div>
+}
+else
+{
+    <div class="planner-full d-flex align-items-center justify-content-center">
+        <span>Planner laden…</span>
+    </div>
+}
